@@ -12,12 +12,7 @@ Rough Performance benchmark estimate/comparison
 On a 10,000 × 10,000 float32 raster:
 
 |Method |  Time | Notes |
-|-------|-------|-------|
 |NumPy	|~180–250 ms | Fast, but single‑threaded |
-|-------|-------|-------|
 |Rust (single‑thread) | ~80–120 ms | LLVM auto‑vectorization |
-|-------|-------|-------|
 |Rust (Rayon parallel) | ~20–40 ms | Fully multi‑core |
-|-------|-------|-------|
 | Rust (SIMD tuned) | ~10–20 ms | Hand‑optimized |
-|-------|-------|-------|
