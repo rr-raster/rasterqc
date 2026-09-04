@@ -20,24 +20,13 @@ On a 10,000 × 10,000 float32 raster:
 
 
 
-* Repository Structure
-
-rasterstats/
-├── Cargo.toml
-|── pixi.toml
-├── pyproject.toml
-├── README.md
-├── src/
-│   ├── lib.rs                # PyO3 module entry point
-│   ├── stats.rs              # Core raster statistics engine (pure Rust)
-│   ├── histogram.rs          # Optional histogram routines
-│   ├── interop.rs            # NumPy <-> Rust zero-copy conversion
-│   └── utils.rs              # Shared helpers (dtype dispatch, masks, etc.)
-├── python/
-│   ├── __init__.py           # Python package wrapper
-│   └── api.py                # Thin Python API (optional)
-└── tests/
-    ├── python_tests.py       # pytest-based tests
-    └── rust_tests.rs         # Rust unit tests for core logic
 
 # Getting Started
+Environment and dependency management is done with pixi:
+
+`pixi install`
+
+
+Compile the Rust:
+
+`pixi run cargo build`
