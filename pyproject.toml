@@ -1,1 +1,32 @@
 #python dependencies declaration
+[build-system]
+requires = ["maturin>=1.4"]
+build-backend = "maturin"
+
+[project]
+name = "rasterqc"
+version = "0.1.0"
+description = "High-performance raster statistics using a Rust backend"
+authors = [
+    { name = "Rebecca Ryan" }
+]
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+
+# Optional but recommended
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "Operating System :: OS Independent",
+]
+
+[tool.maturin]
+# Build a Python module from the Rust crate
+# Ensures the wheel contains the compiled .so/.pyd
+bindings = "pyo3"
+compatibility = "manylinux_2_28"  #ensure linux compatability
+
+# If your Rust crate is in the root directory (Cargo.toml at project root)
+# this is all you need. If you later move Rust code into a subdirectory,
+# you can set `manifest-path` here.

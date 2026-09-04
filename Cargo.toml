@@ -1,1 +1,33 @@
 # dont know what goes here
+[package]
+name = "rasterstats"
+version = "0.1.0"
+edition = "2021"
+description = "High-performance raster statistics using a Rust backend"
+license = "MIT"
+
+[lib]
+# Required for Python extension modules
+crate-type = ["cdylib"]
+
+[dependencies]
+# PyO3 for Python bindings
+pyo3 = { version = "0.19", features = ["extension-module"] }
+
+# NumPy <-> Rust zero-copy interop
+numpy = "0.19"
+
+# Optional: parallel raster processing -multicore processing
+rayon = "1.10"
+
+# Optional: fast math helpers (SIMD-friendly)
+num-traits = "0.2"
+
+# Optional: error handling ergonomics
+thiserror = "1.0"
+
+[profile.release]
+# Optimize for maximum runtime performance
+opt-level = 3
+codegen-units = 1
+lto = true
