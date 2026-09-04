@@ -45,11 +45,110 @@ fn histogram_py<'py>(py: Python<'py>, array: PyReadonlyArray1<'py, f32>, bins: u
     }
 }
 
-/// Python module definition
+
+
+/// Optional: percentile wrapper
+#[pyfunction]
+fn percentiles_py<'py>(py: Python<'py>, array: PyReadonlyArray1<'py, f32>, ps: Vec<f32>)
+    -> PyResult<Vec<f32>>
+{
+    let slice = array.as_slice()?;
+    let out = py.allow_threads(|| {
+        ps.iter().map(|&p| distribution::percentile(slice, p)).collect()
+    });
+    out.into_iter().collect::<Result<Vec<f32>, _>>().map_err(PyErr::from)
+}
+
+
+/// Quantile
+#[pyfunction]
+fn quantile_py<'py>(
+    py: Python<'py>,
+    array: PyReadonlyArray1<'py, f32>,
+    q: f32,
+) -> PyResult<f32> {
+    let slice = array.as_slice()?;
+
+    let result = py.allow_threads(|| distribution::quantile(slice, q));
+    result.map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
+/// Multiple percentiles at once
+#[pyfunction]
+fn percentiles_py<'py>(
+    py: Python<'py>,
+    array: PyReadonlyArray1<'py, f32>,
+    ps: Vec<f32>,
+) -> PyResult<Vec<f32>> {
+    let slice = array.as_slice()?;
+
+    let result = py.allow_threads(|| {
+        ps.iter()
+            .map(|&p| distribution::percentile(slice, p))
+            .collect::<Result<Vec<f32>, _>>()
+    });
+
+    result.map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
+
+/// Interquartile range
+#[pyfunction]
+fn iqr_py<'py>(
+    py: Python<'py>,
+    array: PyReadonlyArray1<'py, f32>,
+) -> PyResult<f32> {
+    let slice = array.as_slice()?;
+
+    let result = py.allow_threads(|| distribution::iqr(slice));
+    result.map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
+/// Skewness
+#[pyfunction]
+fn skewness_py<'py>(
+    py: Python<'py>,
+    array: PyReadonlyArray1<'py, f32>,
+) -> PyResult<f32> {
+    let slice = array.as_slice()?;
+
+    let result = py.allow_threads(|| distribution::skewness(slice));
+    result.map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
+
+/// Kurtosis
+#[pyfunction]
+fn kurtosis_py<'py>(
+    py: Python<'py>,
+    array: PyReadonlyArray1<'py, f32>,
+) -> PyResult<f32> {
+    let slice = array.as_slice()?;
+
+    let result = py.allow_threads(|| distribution::kurtosis(slice));
+    result.map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
+/// Entropy (requires histogram counts)
+#[pyfunction]
+fn entropy_py(counts: Vec<u64>) -> PyResult<f32> {
+    let result = distribution::entropy(&counts);
+    result.map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
+
+/// Python Module definition
 #[pymodule]
 fn rasterstats(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(stats_py, m)?)?;
     m.add_function(wrap_pyfunction!(histogram_py, m)?)?;
+    m.add_function(wrap_pyfunction!(percentile_py, m)?)?;
+    m.add_function(wrap_pyfunction!(quantile_py, m)?)?;
+    m.add_function(wrap_pyfunction!(percentiles_py, m)?)?;
+    m.add_function(wrap_pyfunction!(iqr_py, m)?)?;
+    m.add_function(wrap_pyfunction!(skewness_py, m)?)?;
+    m.add_function(wrap_pyfunction!(kurtosis_py, m)?)?;
+    m.add_function(wrap_pyfunction!(entropy_py, m)?)?;
 
     // If you expose classes later, register them here
 
