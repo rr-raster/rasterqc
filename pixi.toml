@@ -1,0 +1,35 @@
+[workspace]
+name = "rasterqc"
+version = "0.1.0"
+description = "High-performance raster statistics using Rust + PyO3"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+python = "==3.11"
+maturin = "*"
+rust = "*"
+pip = ">=26.2.1,<27"
+numpy = ">=2.4.6,<3"
+
+[tasks]
+# Build and install the Python extension into the Pixi environment
+develop = "maturin develop"
+
+# Build distributable wheels
+build = "maturin build"
+
+# Run Rust unit tests
+test-rust = "cargo test"
+
+# Run Python tests (pytest)
+test-python = "pytest -q"
+
+# Format Rust code
+fmt = "cargo fmt"
+
+# Lint Rust code
+lint = "cargo clippy"
+
+# Benchmark Rust core
+bench = "cargo bench"

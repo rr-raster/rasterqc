@@ -10,6 +10,7 @@ use numpy::{PyReadonlyArray1};
 mod stats;
 mod histogram;
 mod interop;
+mod distribution;
 
 /// Compute basic statistics (min, max, mean, std, median) on a raster.
 ///
@@ -47,19 +48,6 @@ fn histogram_py<'py>(py: Python<'py>, array: PyReadonlyArray1<'py, f32>, bins: u
 
 
 
-/// Optional: percentile wrapper
-#[pyfunction]
-fn percentiles_py<'py>(py: Python<'py>, array: PyReadonlyArray1<'py, f32>, ps: Vec<f32>)
-    -> PyResult<Vec<f32>>
-{
-    let slice = array.as_slice()?;
-    let out = py.allow_threads(|| {
-        ps.iter().map(|&p| distribution::percentile(slice, p)).collect()
-    });
-    out.into_iter().collect::<Result<Vec<f32>, _>>().map_err(PyErr::from)
-}
-
-
 /// Quantile
 #[pyfunction]
 fn quantile_py<'py>(
@@ -70,7 +58,18 @@ fn quantile_py<'py>(
     let slice = array.as_slice()?;
 
     let result = py.allow_threads(|| distribution::quantile(slice, q));
-    result.map_err(pyo3::exceptions::PyValueError::new_err)
+    result.map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
+}
+
+#[pyfunction]
+fn percentile_py<'py>(
+    py: Python<'py>,
+    array: PyReadonlyArray1<'py, f32>,
+    p: f32,
+) -> PyResult<f32> {
+    let slice = array.as_slice()?;
+    let result = py.allow_threads(|| distribution::percentile(slice, p));
+    result.map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 /// Multiple percentiles at once
@@ -88,7 +87,7 @@ fn percentiles_py<'py>(
             .collect::<Result<Vec<f32>, _>>()
     });
 
-    result.map_err(pyo3::exceptions::PyValueError::new_err)
+    result.map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 
@@ -101,7 +100,7 @@ fn iqr_py<'py>(
     let slice = array.as_slice()?;
 
     let result = py.allow_threads(|| distribution::iqr(slice));
-    result.map_err(pyo3::exceptions::PyValueError::new_err)
+    result.map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 /// Skewness
@@ -113,7 +112,7 @@ fn skewness_py<'py>(
     let slice = array.as_slice()?;
 
     let result = py.allow_threads(|| distribution::skewness(slice));
-    result.map_err(pyo3::exceptions::PyValueError::new_err)
+    result.map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 
@@ -126,20 +125,20 @@ fn kurtosis_py<'py>(
     let slice = array.as_slice()?;
 
     let result = py.allow_threads(|| distribution::kurtosis(slice));
-    result.map_err(pyo3::exceptions::PyValueError::new_err)
+    result.map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 /// Entropy (requires histogram counts)
 #[pyfunction]
 fn entropy_py(counts: Vec<u64>) -> PyResult<f32> {
     let result = distribution::entropy(&counts);
-    result.map_err(pyo3::exceptions::PyValueError::new_err)
+    result.map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 
 /// Python Module definition
 #[pymodule]
-fn rasterstats(_py: Python, m: &PyModule) -> PyResult<()> {
+fn rasterqc(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(stats_py, m)?)?;
     m.add_function(wrap_pyfunction!(histogram_py, m)?)?;
     m.add_function(wrap_pyfunction!(percentile_py, m)?)?;

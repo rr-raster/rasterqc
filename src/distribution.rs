@@ -64,17 +64,19 @@ pub fn skewness(data: &[f32]) -> Result<f32, DistributionError> {
     let n = data.len() as f32;
     let mean = data.par_iter().copied().sum::<f32>() / n;
 
-    let mut m2 = 0.0f32;
-    let mut m3 = 0.0f32;
-
-    data.par_iter().for_each(|&x| {
+    let m2: f32 = data.par_iter()
+    .map(|&x| {
         let d = x - mean;
-        m2 += d * d;
-        m3 += d * d * d;
-    });
+        d * d
+    })
+    .sum::<f32>() / n;
 
-    let m2 = m2 / n;
-    let m3 = m3 / n;
+    let m3: f32 = data.par_iter()
+    .map(|&x| {
+        let d = x - mean;
+        d * d * d
+    })
+    .sum::<f32>() / n;
 
     if m2 == 0.0 {
         return Err(DistributionError::ComputeError);
@@ -92,17 +94,19 @@ pub fn kurtosis(data: &[f32]) -> Result<f32, DistributionError> {
     let n = data.len() as f32;
     let mean = data.par_iter().copied().sum::<f32>() / n;
 
-    let mut m2 = 0.0f32;
-    let mut m4 = 0.0f32;
+    let m2: f32 = data.par_iter()
+        .map(|&x| {
+            let d = x - mean;
+            d * d
+        })
+        .sum::<f32>() / n;
 
-    data.par_iter().for_each(|&x| {
-        let d = x - mean;
-        m2 += d * d;
-        m4 += d.powi(4);
-    });
-
-    let m2 = m2 / n;
-    let m4 = m4 / n;
+    let m4: f32 = data.par_iter()
+        .map(|&x| {
+            let d = x - mean;
+            d.powi(4)
+        })
+        .sum::<f32>() / n;
 
     if m2 == 0.0 {
         return Err(DistributionError::ComputeError);

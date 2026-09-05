@@ -1,6 +1,6 @@
 The goal of this project is to provides a high-performance Rust backend for computing statistics
  on raster imagery, exposed as a lightweight Python module via PyO3.
-It will be designed for scientific workflows where large rasters, multi-band datasets, and custom per-pixel logic
+It is be designed to be called from python, for scientific workflows where large rasters, multi-band datasets, and custom per-pixel logic
  demand more speed than NumPy can reliably deliver. 
  
  By combining Rust's native performance, zero-cost abstractions, and safe memory model with Python's ease of use, the module offers fast, reliable raster analytics without changing your existing Python pipeline.
@@ -33,3 +33,5 @@ Environment and dependency management is done with pixi:
 
 
 # Use in python example
+
+`pixi run python examples/quickstart.py`
