@@ -2,6 +2,7 @@
 use rayon::prelude::*;
 use thiserror::Error;
 
+
 #[derive(Debug, Error)]
 pub enum StatsError {
     #[error("input raster is empty")]

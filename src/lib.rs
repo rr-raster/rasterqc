@@ -1,10 +1,11 @@
 //PyO3 module entry point
 
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use pyo3::exceptions::PyValueError;
 
 //use numpy::{PyArray1, PyReadonlyArray1};
-use numpy::{PyReadonlyArray1};
+use numpy::{PyReadonlyArray1, PyReadonlyArrayDyn};
 //use numpy::ndarray::ArrayView1;
 
 mod stats;
@@ -18,17 +19,26 @@ mod distribution;
 ///     stats(array: numpy.ndarray) -> (float, float, float, float, float)
 /// (min, max, mean, std, median)
 #[pyfunction]
-fn stats_py<'py>(py: Python<'py>, array: PyReadonlyArray1<'py, f32>) -> PyResult<(f32, f32, f32, f32, f32)> {
-    // Extract Rust slice without copying
-    let slice = interop::array_to_slice(&array)?;
+fn stats_py(py: Python<'_>, array: PyReadonlyArrayDyn<'_, f32>) -> PyResult<PyObject> {
+    // Obtain an ndarray view of the array (any dimensionality)
+    let view = array.as_array();
 
-    // Release GIL during heavy computation
-    let result = py.allow_threads(|| stats::compute_stats(slice));
+    // Require C-contiguous memory so we can borrow a slice
+    let slice = view
+        .as_slice_memory_order()
+        .ok_or_else(|| PyValueError::new_err("array must be C-contiguous"))?;
 
-    match result {
-        Ok(stats) => Ok(stats),
-        Err(e) => Err(PyValueError::new_err(e.to_string())),
-    }
+    let (minv, maxv, mean, std, median) =
+        stats::compute_stats(slice).map_err(|e| PyValueError::new_err(e.to_string()))?;
+
+    let dict = PyDict::new(py);
+    dict.set_item("min", minv)?;
+    dict.set_item("max", maxv)?;
+    dict.set_item("mean", mean)?;
+    dict.set_item("std", std)?;
+    dict.set_item("median", median)?;
+
+    Ok(dict.into())
 }
 
 /// Optional: histogram wrapper
