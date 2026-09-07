@@ -1,6 +1,6 @@
 # dont know what goes here
 [package]
-name = "rasterstats"
+name = "rasterqc"
 version = "0.1.0"
 edition = "2021"
 description = "High-performance raster statistics using a Rust backend"
