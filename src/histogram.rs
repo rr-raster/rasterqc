@@ -21,6 +21,7 @@ pub enum HistogramError {
 ///
 /// Returns:
 ///     Vec<u64>          - histogram counts
+#[allow(dead_code)]
 pub fn compute_histogram(data: &[f32], bins: usize) -> Result<Vec<u64>, HistogramError> {
     if data.is_empty() {
         return Err(HistogramError::EmptyInput);

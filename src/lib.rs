@@ -4,7 +4,6 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use pyo3::exceptions::PyValueError;
 
-//use numpy::{PyArray1, PyReadonlyArray1};
 use numpy::{PyReadonlyArray1, PyReadonlyArrayDyn};
 //use numpy::ndarray::ArrayView1;
 
@@ -18,8 +17,8 @@ mod distribution;
 /// Python signature:
 ///     stats(array: numpy.ndarray) -> (float, float, float, float, float)
 /// (min, max, mean, std, median)
-#[pyfunction]
-fn stats_py(py: Python<'_>, array: PyReadonlyArrayDyn<'_, f32>) -> PyResult<PyObject> {
+#[pyfunction(name = "stats")]
+fn stats_wrapper(py: Python<'_>, array: PyReadonlyArrayDyn<'_, f32>) -> PyResult<PyObject> {
     // Obtain an ndarray view of the array (any dimensionality)
     let view = array.as_array();
 
@@ -42,8 +41,8 @@ fn stats_py(py: Python<'_>, array: PyReadonlyArrayDyn<'_, f32>) -> PyResult<PyOb
 }
 
 /// Optional: histogram wrapper
-#[pyfunction]
-fn histogram_py<'py>(py: Python<'py>, array: PyReadonlyArray1<'py, f32>, bins: usize)
+#[pyfunction(name = "histogram")]
+fn histogram_wrapper<'py>(py: Python<'py>, array: PyReadonlyArray1<'py, f32>, bins: usize)
     -> PyResult<Vec<u64>>
 {
     let slice = interop::array_to_slice(&array)?;
@@ -60,7 +59,7 @@ fn histogram_py<'py>(py: Python<'py>, array: PyReadonlyArray1<'py, f32>, bins: u
 
 /// Quantile
 #[pyfunction]
-fn quantile_py<'py>(
+fn quantile<'py>(
     py: Python<'py>,
     array: PyReadonlyArray1<'py, f32>,
     q: f32,
@@ -72,7 +71,7 @@ fn quantile_py<'py>(
 }
 
 #[pyfunction]
-fn percentile_py<'py>(
+fn percentile<'py>(
     py: Python<'py>,
     array: PyReadonlyArray1<'py, f32>,
     p: f32,
@@ -84,7 +83,7 @@ fn percentile_py<'py>(
 
 /// Multiple percentiles at once
 #[pyfunction]
-fn percentiles_py<'py>(
+fn percentiles<'py>(
     py: Python<'py>,
     array: PyReadonlyArray1<'py, f32>,
     ps: Vec<f32>,
@@ -103,7 +102,7 @@ fn percentiles_py<'py>(
 
 /// Interquartile range
 #[pyfunction]
-fn iqr_py<'py>(
+fn iqr<'py>(
     py: Python<'py>,
     array: PyReadonlyArray1<'py, f32>,
 ) -> PyResult<f32> {
@@ -115,7 +114,7 @@ fn iqr_py<'py>(
 
 /// Skewness
 #[pyfunction]
-fn skewness_py<'py>(
+fn skewness<'py>(
     py: Python<'py>,
     array: PyReadonlyArray1<'py, f32>,
 ) -> PyResult<f32> {
@@ -128,7 +127,7 @@ fn skewness_py<'py>(
 
 /// Kurtosis
 #[pyfunction]
-fn kurtosis_py<'py>(
+fn kurtosis<'py>(
     py: Python<'py>,
     array: PyReadonlyArray1<'py, f32>,
 ) -> PyResult<f32> {
@@ -140,7 +139,7 @@ fn kurtosis_py<'py>(
 
 /// Entropy (requires histogram counts)
 #[pyfunction]
-fn entropy_py(counts: Vec<u64>) -> PyResult<f32> {
+fn entropy(counts: Vec<u64>) -> PyResult<f32> {
     let result = distribution::entropy(&counts);
     result.map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
@@ -149,15 +148,15 @@ fn entropy_py(counts: Vec<u64>) -> PyResult<f32> {
 /// Python Module definition
 #[pymodule]
 fn rasterqc(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(stats_py, m)?)?;
-    m.add_function(wrap_pyfunction!(histogram_py, m)?)?;
-    m.add_function(wrap_pyfunction!(percentile_py, m)?)?;
-    m.add_function(wrap_pyfunction!(quantile_py, m)?)?;
-    m.add_function(wrap_pyfunction!(percentiles_py, m)?)?;
-    m.add_function(wrap_pyfunction!(iqr_py, m)?)?;
-    m.add_function(wrap_pyfunction!(skewness_py, m)?)?;
-    m.add_function(wrap_pyfunction!(kurtosis_py, m)?)?;
-    m.add_function(wrap_pyfunction!(entropy_py, m)?)?;
+    m.add_function(wrap_pyfunction!(stats_wrapper, m)?)?;
+    m.add_function(wrap_pyfunction!(histogram_wrapper, m)?)?;
+    m.add_function(wrap_pyfunction!(percentile, m)?)?;
+    m.add_function(wrap_pyfunction!(quantile, m)?)?;
+    m.add_function(wrap_pyfunction!(percentiles, m)?)?;
+    m.add_function(wrap_pyfunction!(iqr, m)?)?;
+    m.add_function(wrap_pyfunction!(skewness, m)?)?;
+    m.add_function(wrap_pyfunction!(kurtosis, m)?)?;
+    m.add_function(wrap_pyfunction!(entropy, m)?)?;
 
     // If you expose classes later, register them here
 
