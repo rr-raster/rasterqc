@@ -30,13 +30,15 @@ pub fn percentile(data: &[f32], p: f32) -> Result<f32, DistributionError> {
         return Err(DistributionError::InvalidPercentile);
     }
 
-    // Copy + sort (parallel)
     let mut v: Vec<f32> = data.to_vec();
-    v.par_sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
+    // target index
     let rank = (p / 100.0) * ((v.len() - 1) as f32);
     let idx = rank.floor() as usize;
 
+    // nth-element selection (in-place) using comparator for f32 PartialOrd
+    use std::cmp::Ordering;
+    v.select_nth_unstable_by(idx, |a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
     Ok(v[idx])
 }
 
@@ -64,19 +66,18 @@ pub fn skewness(data: &[f32]) -> Result<f32, DistributionError> {
     let n = data.len() as f32;
     let mean = data.par_iter().copied().sum::<f32>() / n;
 
-    let m2: f32 = data.par_iter()
-    .map(|&x| {
-        let d = x - mean;
-        d * d
-    })
-    .sum::<f32>() / n;
+    // Combine second and third central moment computation into a single
+    // parallel pass to reduce memory passes and iterator overhead.
+    let (m2_sum, m3_sum) = data
+        .par_iter()
+        .fold(|| (0.0f32, 0.0f32), |(s2, s3), &x| {
+            let d = x - mean;
+            (s2 + d * d, s3 + d * d * d)
+        })
+        .reduce(|| (0.0f32, 0.0f32), |a, b| (a.0 + b.0, a.1 + b.1));
 
-    let m3: f32 = data.par_iter()
-    .map(|&x| {
-        let d = x - mean;
-        d * d * d
-    })
-    .sum::<f32>() / n;
+    let m2: f32 = m2_sum / n;
+    let m3: f32 = m3_sum / n;
 
     if m2 == 0.0 {
         return Err(DistributionError::ComputeError);
@@ -94,19 +95,17 @@ pub fn kurtosis(data: &[f32]) -> Result<f32, DistributionError> {
     let n = data.len() as f32;
     let mean = data.par_iter().copied().sum::<f32>() / n;
 
-    let m2: f32 = data.par_iter()
-        .map(|&x| {
+    // Compute both second and fourth central moments in a single parallel pass.
+    let (m2_sum, m4_sum) = data
+        .par_iter()
+        .fold(|| (0.0f32, 0.0f32), |(s2, s4), &x| {
             let d = x - mean;
-            d * d
+            (s2 + d * d, s4 + d.powi(4))
         })
-        .sum::<f32>() / n;
+        .reduce(|| (0.0f32, 0.0f32), |a, b| (a.0 + b.0, a.1 + b.1));
 
-    let m4: f32 = data.par_iter()
-        .map(|&x| {
-            let d = x - mean;
-            d.powi(4)
-        })
-        .sum::<f32>() / n;
+    let m2: f32 = m2_sum / n;
+    let m4: f32 = m4_sum / n;
 
     if m2 == 0.0 {
         return Err(DistributionError::ComputeError);

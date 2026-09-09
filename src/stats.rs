@@ -50,19 +50,19 @@ pub fn compute_stats(data: &[f32]) -> Result<(f32, f32, f32, f32, f32), StatsErr
     let std = (sum_sq / n - mean * mean).sqrt();
 
     // --- Median ---
-    // Fast nth-element selection instead of full sort
-    //let mut vec = data.to_vec();
-    //let mid = vec.len() / 2;
-    //let median = {
-    //    let (left, _, _) = vec.select_nth_unstable(mid);
-    //    left[mid]
-    //};
+
+    // --- Median (fast nth-element selection) ---
+    let mut vec = data.to_vec();
+    let mid = vec.len() / 2;
+    use std::cmp::Ordering;
+    vec.select_nth_unstable_by(mid, |a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+    let median = vec[mid];
 
     // Sorted approach for median calculation. This is a simple implementation
     //  and can be replaced with a more efficient algorithm (commented out above) if needed.
-    let mut sorted = data.to_vec();
-    sorted.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-    let median = sorted[sorted.len() / 2]; 
+    //let mut sorted = data.to_vec();
+    //sorted.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
+    //let median = sorted[sorted.len() / 2]; 
 
 
     Ok((min, max, mean, std, median))
@@ -78,29 +78,40 @@ pub fn compute_histogram(data: &[f32], bins: usize) -> Result<Vec<u64>, StatsErr
     let max = data.iter().cloned().fold(f32::MIN, f32::max);
 
     let range = max - min;
-    let bin_width = range / bins as f32;
+    // If all values are identical, put them all in the last bin.
+    if range == 0.0 {
+        let mut hist = vec![0u64; bins];
+        if bins > 0 {
+            hist[bins - 1] = data.len() as u64;
+        }
+        return Ok(hist);
+    }
 
-   // let mut hist = vec![0u64; bins];
+    // Precompute inverse of bin width to replace division with a multiply.
+    let inv_bin = (bins as f32) / range; // maps (v-min)*inv_bin -> [0,bins)
 
     let hist = data
-    .par_iter()
-    .fold(
-        || vec![0u64; bins],
-        |mut local_hist, &v| {
-            let idx = (((v - min) / bin_width).floor() as usize).min(bins - 1);
-            local_hist[idx] += 1;
-            local_hist
-        },
-    )
-    .reduce(
-        || vec![0u64; bins],
-        |mut a, b| {
-            for i in 0..bins {
-                a[i] += b[i];
-            }
-            a
-        },
-    );
+        .par_iter()
+        .fold(
+            || vec![0u64; bins],
+            |mut local_hist, &v| {
+                // compute tentative bin index, clamp into [0, bins-1]
+                let idx = ((v - min) * inv_bin) as isize;
+                let idx = if idx < 0 { 0 } else { idx as usize };
+                let idx = if idx >= bins { bins - 1 } else { idx };
+                local_hist[idx] += 1;
+                local_hist
+            },
+        )
+        .reduce(
+            || vec![0u64; bins],
+            |mut a, b| {
+                for i in 0..bins {
+                    a[i] += b[i];
+                }
+                a
+            },
+        );
 
     Ok(hist)
 }

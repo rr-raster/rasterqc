@@ -37,15 +37,23 @@ pub fn compute_histogram(data: &[f32], bins: usize) -> Result<Vec<u64>, Histogra
         .reduce(|| (f32::MAX, f32::MIN), |a, b| (a.0.min(b.0), a.1.max(b.1)));
 
     let range = max - min;
-    let bin_width = range / bins as f32;
+    // Precompute inverse bin width to replace divisions with a multiply.
+    let inv_bin = if range > 0.0 { (bins as f32) / range } else { 0.0 };
 
     let hist = data
         .par_iter()
         .fold(
             || vec![0u64; bins],
             |mut local_hist, &v| {
-                let idx = if bin_width > 0.0 {
-                    (((v - min) / bin_width).floor() as usize).min(bins - 1)
+                // Compute tentative bin index using multiplication (faster than division/floor).
+                let idx = if inv_bin > 0.0 {
+                    let mut i = ((v - min) * inv_bin) as isize;
+                    if i < 0 {
+                        i = 0;
+                    } else if i as usize >= bins {
+                        i = (bins - 1) as isize;
+                    }
+                    i as usize
                 } else {
                     0
                 };
