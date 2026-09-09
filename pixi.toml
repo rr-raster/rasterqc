@@ -3,7 +3,7 @@ name = "rasterqc"
 version = "0.1.0"
 description = "High-performance raster statistics using Rust + PyO3"
 channels = ["conda-forge"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 
 [dependencies]
 python = "==3.11"
