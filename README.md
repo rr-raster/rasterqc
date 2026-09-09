@@ -1,3 +1,5 @@
+# Rasterqc (fast rust based raster statistics)
+
 The goal of this project is to provides a high-performance Rust backend for computing statistics
  on raster imagery, exposed as a lightweight Python module via PyO3.
 It is be designed to be called from python, for scientific workflows where large rasters, multi-band datasets, and custom per-pixel logic
