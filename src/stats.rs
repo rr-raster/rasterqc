@@ -1,7 +1,7 @@
 /// Core statistics module
 ///
 /// Provides fast, parallel computation of basic descriptive statistics for
-/// raster and imaging data. The functions operate on slices of `f32` values. 
+/// raster and imaging data. The functions operate on slices of `f32` values.
 /// Functions implemented:
 ///
 /// * compute_stats: min, max, mean, std, median
@@ -59,9 +59,9 @@ pub fn compute_stats(data: &[f32]) -> Result<(f32, f32, f32, f32, f32), StatsErr
     let mut vec = data.to_vec();
     let len = vec.len();
     use std::cmp::Ordering;
-    
+
     vec.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
-    
+
     let median = if len % 2 == 1 {
         // Odd length: use middle element
         vec[len / 2]

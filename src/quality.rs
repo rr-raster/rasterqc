@@ -11,7 +11,6 @@
 /// scientific imaging workflows where fast, parallel computation is useful.
 /// All results are returned in a `Result` to handle invalid inputs such as
 /// empty data or degenerate values.
-
 use rayon::prelude::*;
 use thiserror::Error;
 
@@ -23,7 +22,7 @@ pub enum StatsError {
     ComputeError,
 }
 
-/// Signal‑to‑Noise Ratio (SNR), 
+/// Signal‑to‑Noise Ratio (SNR),
 /// defined as `mean / standard_deviation (SNR = mu / sigma)
 ///
 /// This computes:
@@ -31,7 +30,7 @@ pub enum StatsError {
 /// - the variance and standard deviation
 ///
 /// SNR is a common quality metric in imaging and raster analysis, expressing
-/// how strong the signal is relative to noise. 
+/// how strong the signal is relative to noise.
 pub fn snr(data: &[f32]) -> Result<f32, StatsError> {
     if data.is_empty() {
         return Err(StatsError::EmptyInput);
@@ -58,7 +57,6 @@ pub fn snr(data: &[f32]) -> Result<f32, StatsError> {
 
     Ok(mean / std)
 }
-
 
 /// Dynamic range, computed as `max / min`.
 ///

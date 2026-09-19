@@ -1,11 +1,11 @@
 /// Distribution statistics module
 ///
 /// functions to compute various distribution statistics covering:
-/// 
-/// * percentiles 
-/// * quantiles 
-/// * interquartile range (IQR) 
-/// * skewness 
+///
+/// * percentiles
+/// * quantiles
+/// * interquartile range (IQR)
+/// * skewness
 /// * kurtosis
 /// * Shannon entropy  
 ///
@@ -14,7 +14,6 @@
 /// The functions return results wrapped in a `Result` type to handle potential errors,
 /// such as empty input or invalid parameters.
 ///
-
 use rayon::prelude::*;
 use thiserror::Error;
 
@@ -126,8 +125,7 @@ pub fn skewness(data: &[f32]) -> Result<f32, DistributionError> {
     Ok(m3 / m2.powf(1.5))
 }
 
-
-/// Kurtosis (excess kurtosis) 
+/// Kurtosis (excess kurtosis)
 /// describing the "tailedness" of a distribution.
 ///
 /// This computes the **fourth standardized moment**, returning
@@ -177,7 +175,7 @@ pub fn kurtosis(data: &[f32]) -> Result<f32, DistributionError> {
 /// `entropy = -Σ p * ln(p)`
 ///
 /// where `p = count / total`.  
-/// Zero-count bins are ignored. 
+/// Zero-count bins are ignored.
 ///
 pub fn entropy(counts: &[u64]) -> Result<f32, DistributionError> {
     let total: f32 = counts.iter().map(|&c| c as f32).sum();

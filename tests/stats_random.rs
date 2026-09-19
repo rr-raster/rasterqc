@@ -1,4 +1,4 @@
-use rasterqc::stats::{compute_stats, compute_histogram};
+use rasterqc::stats::{compute_histogram, compute_stats};
 
 #[test]
 fn test_stats_large_random() {

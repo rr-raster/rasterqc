@@ -29,14 +29,17 @@
 /// cat image.raw | rasterqc percentile --p 95
 /// cat image.raw | rasterqc dr --db
 /// ```
-
 use clap::{Parser, Subcommand};
-use rasterqc::{stats, quality, distribution};
+use rasterqc::{distribution, quality, stats};
 use serde_json::json;
 use std::io::{self, Read};
 
 #[derive(Parser)]
-#[command(name = "rasterqc", version, about = "Raster quality metrics CLI - reads f32 data from stdin")]
+#[command(
+    name = "rasterqc",
+    version,
+    about = "Raster quality metrics CLI - reads f32 data from stdin"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -101,7 +104,8 @@ fn main() {
     match cli.command {
         Command::Stats { json } => {
             let data = read_stdin_data().expect("Failed to read data from stdin");
-            let (min, max, mean, std, median) = stats::compute_stats(&data).expect("Failed to compute stats");
+            let (min, max, mean, std, median) =
+                stats::compute_stats(&data).expect("Failed to compute stats");
 
             if json {
                 let out = json!({

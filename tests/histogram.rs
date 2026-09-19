@@ -24,7 +24,10 @@ fn test_histogram_all_same_bin() {
 #[test]
 fn test_histogram_empty() {
     let data: Vec<f32> = vec![];
-    assert!(matches!(compute_histogram(&data, 10), Err(HistogramError::EmptyInput)));
+    assert!(matches!(
+        compute_histogram(&data, 10),
+        Err(HistogramError::EmptyInput)
+    ));
 }
 
 #[test]

@@ -20,12 +20,21 @@ fn test_percentile_unsorted() {
 fn test_percentile_invalid_range() {
     let data = vec![1.0, 2.0, 3.0];
 
-    assert!(matches!(percentile(&data, -1.0), Err(DistributionError::InvalidPercentile)));
-    assert!(matches!(percentile(&data, 101.0), Err(DistributionError::InvalidPercentile)));
+    assert!(matches!(
+        percentile(&data, -1.0),
+        Err(DistributionError::InvalidPercentile)
+    ));
+    assert!(matches!(
+        percentile(&data, 101.0),
+        Err(DistributionError::InvalidPercentile)
+    ));
 }
 
 #[test]
 fn test_percentile_empty() {
     let data: Vec<f32> = vec![];
-    assert!(matches!(percentile(&data, 50.0), Err(DistributionError::EmptyInput)));
+    assert!(matches!(
+        percentile(&data, 50.0),
+        Err(DistributionError::EmptyInput)
+    ));
 }
