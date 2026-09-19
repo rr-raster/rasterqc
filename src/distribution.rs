@@ -1,17 +1,19 @@
 /// Distribution statistics module
 ///
-/// functions to compute various distribution statistics
+/// functions to compute various distribution statistics covering:
 /// 
-/// * percentiles, 
-/// * quantiles, 
-/// * interquartile range (IQR), 
-/// * skewness, 
-/// * kurtosis, and 
-/// * Shannon entropy.  
+/// * percentiles 
+/// * quantiles 
+/// * interquartile range (IQR) 
+/// * skewness 
+/// * kurtosis
+/// * Shannon entropy  
+///
 /// It is designed to work with slices of f32 values and u64 counts,
 /// and it uses parallel computation for efficiency where applicable.  
 /// The functions return results wrapped in a `Result` type to handle potential errors,
 /// such as empty input or invalid parameters.
+///
 
 use rayon::prelude::*;
 use thiserror::Error;
