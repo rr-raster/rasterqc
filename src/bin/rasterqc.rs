@@ -1,10 +1,40 @@
+/// RasterQC command‑line interface
+///
+/// A minimal, fast CLI for computing raster quality and distribution metrics
+/// over raw `f32` pixel data. The tool reads **little‑endian f32 values from
+/// stdin**, making it easy to integrate into scientific imaging pipelines,
+/// shell scripts, and batch processing workflows.
+///
+/// Supported commands:
+///
+/// * **stats** — compute min, max, mean, std, median  
+/// * **histogram** — fixed‑width histogram with configurable bin count  
+/// * **percentile** — compute a percentile using the distribution module  
+/// * **snr** — signal‑to‑noise ratio (mean / std)  
+/// * **uniformity** — 1 − (σ / μ)  
+/// * **dr** — dynamic range (linear or dB)  
+///
+/// All commands accept binary f32 input via stdin. Many commands support
+/// optional JSON output for machine‑readable integration.
+///
+/// Internally, the CLI delegates computation to the `stats`, `quality`,
+/// and `distribution` modules, each of which is optimized for performance
+///  using parallel processing and efficient algorithms.
+///
+/// Example usage on raw f32 data array:
+///
+/// ```bash
+/// cat image.raw | rasterqc stats --json
+/// cat image.raw | rasterqc histogram --bins 512
+/// cat image.raw | rasterqc percentile --p 95
+/// cat image.raw | rasterqc dr --db
+/// ```
+
 use clap::{Parser, Subcommand};
 use rasterqc::{stats, quality, distribution};
 use serde_json::json;
 use std::io::{self, Read};
 
-/// RasterQC — minimal CLI for raster quality metrics
-/// Reads f32 pixel data from stdin
 #[derive(Parser)]
 #[command(name = "rasterqc", version, about = "Raster quality metrics CLI - reads f32 data from stdin")]
 struct Cli {
