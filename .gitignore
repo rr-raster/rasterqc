@@ -10,3 +10,5 @@ scripts/build.ps1
 scripts/build.sh
 src/load.rs
 src/utils.rs
+
+target/
