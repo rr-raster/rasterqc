@@ -1,4 +1,4 @@
-use rasterqc_core::stats::{compute_stats, compute_histogram, StatsError};
+use rasterqc::stats::{compute_stats, StatsError};
 
 #[test]
 fn test_basic_stats_small_array() {
@@ -29,10 +29,7 @@ fn test_stats_single_value() {
 fn test_stats_empty_input() {
     let data: Vec<f32> = vec![];
     let err = compute_stats(&data).unwrap_err();
-    match err {
-        StatsError::EmptyInput => {}
-        _ => panic!("Expected EmptyInput error"),
-    }
+    assert!(matches!(err, StatsError::EmptyInput));
 }
 
 #[test]
@@ -44,6 +41,6 @@ fn test_stats_unsorted_input() {
     assert_eq!(min, -1.0);
     assert_eq!(max, 10.0);
     assert_eq!(mean, 4.75);
-    assert!((std - 4.147288).abs() < 1e-6);
+    assert!((std - 4.145781).abs() < 1e-5); // sqrt(275/16) ≈ 4.145781
     assert_eq!(median, 5.0); // sorted: [-1, 3, 7, 10]
 }

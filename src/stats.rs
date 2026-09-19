@@ -34,19 +34,21 @@ pub fn compute_stats(data: &[f32]) -> Result<(f32, f32, f32, f32, f32), StatsErr
     let std = (sum_sq / n - mean * mean).sqrt();
 
     // --- Median ---
-
-    // --- Median (fast nth-element selection) ---
+    // For even-length arrays, interpolate between the two middle values
     let mut vec = data.to_vec();
-    let mid = vec.len() / 2;
+    let len = vec.len();
     use std::cmp::Ordering;
-    vec.select_nth_unstable_by(mid, |a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
-    let median = vec[mid];
-
-    // Sorted approach for median calculation. This is a simple implementation
-    //  and can be replaced with a more efficient algorithm (commented out above) if needed.
-    //let mut sorted = data.to_vec();
-    //sorted.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-    //let median = sorted[sorted.len() / 2];
+    
+    vec.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+    
+    let median = if len % 2 == 1 {
+        // Odd length: use middle element
+        vec[len / 2]
+    } else {
+        // Even length: average the two middle elements
+        let mid = len / 2;
+        (vec[mid - 1] + vec[mid]) / 2.0
+    };
 
     Ok((min, max, mean, std, median))
 }

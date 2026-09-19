@@ -23,6 +23,7 @@ fn get_slice<'a>(array: &'a PyReadonlyArrayDyn<'a, f32>) -> Result<&'a [f32], Py
 }
 
 /// Zero-copy slice extraction for u64 arrays (used for histogram counts / entropy)
+#[allow(dead_code)]
 fn get_u64_slice<'a>(array: &'a PyReadonlyArrayDyn<'a, u64>) -> Result<&'a [u64], PyErr> {
     array
         .as_slice()

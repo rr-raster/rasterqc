@@ -19,9 +19,8 @@ pub enum DistributionError {
     ComputeError,
 }
 
-/// Compute a percentile using a sorted copy of the data.
-/// This is the simplest correct implementation; you can replace it
-/// with a histogram-based version later.
+/// Compute a percentile using linear interpolation.
+/// Uses the standard "nearest rank" method with linear interpolation.
 pub fn percentile(data: &[f32], p: f32) -> Result<f32, DistributionError> {
     if data.is_empty() {
         return Err(DistributionError::EmptyInput);
@@ -31,15 +30,19 @@ pub fn percentile(data: &[f32], p: f32) -> Result<f32, DistributionError> {
     }
 
     let mut v: Vec<f32> = data.to_vec();
+    v.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
 
-    // target index
+    // target index with interpolation
     let rank = (p / 100.0) * ((v.len() - 1) as f32);
-    let idx = rank.floor() as usize;
+    let idx_low = rank.floor() as usize;
+    let idx_high = rank.ceil() as usize;
+    let fraction = rank - rank.floor();
 
-    // nth-element selection (in-place) using comparator for f32 PartialOrd
-    use std::cmp::Ordering;
-    v.select_nth_unstable_by(idx, |a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
-    Ok(v[idx])
+    if idx_high >= v.len() {
+        Ok(v[v.len() - 1])
+    } else {
+        Ok(v[idx_low] + fraction * (v[idx_high] - v[idx_low]))
+    }
 }
 
 /// Compute a quantile in [0, 1]
