@@ -2,13 +2,11 @@
 use rayon::prelude::*;
 use thiserror::Error;
 
-
 #[derive(Debug, Error)]
 pub enum StatsError {
     #[error("input raster is empty")]
     EmptyInput,
 }
-
 
 /// Compute min, max, mean, std, median on a raster slice.
 ///
@@ -24,25 +22,11 @@ pub fn compute_stats(data: &[f32]) -> Result<(f32, f32, f32, f32, f32), StatsErr
         .par_iter()
         .fold(
             || (f32::MAX, f32::MIN, 0.0f32, 0.0f32),
-            |(min, max, sum, sum_sq), &v| {
-                (
-                    min.min(v),
-                    max.max(v),
-                    sum + v,
-                    sum_sq + v * v,
-                )
-            },
+            |(min, max, sum, sum_sq), &v| (min.min(v), max.max(v), sum + v, sum_sq + v * v),
         )
         .reduce(
             || (f32::MAX, f32::MIN, 0.0f32, 0.0f32),
-            |a, b| {
-                (
-                    a.0.min(b.0),
-                    a.1.max(b.1),
-                    a.2 + b.2,
-                    a.3 + b.3,
-                )
-            },
+            |a, b| (a.0.min(b.0), a.1.max(b.1), a.2 + b.2, a.3 + b.3),
         );
 
     let n = data.len() as f32;
@@ -62,8 +46,7 @@ pub fn compute_stats(data: &[f32]) -> Result<(f32, f32, f32, f32, f32), StatsErr
     //  and can be replaced with a more efficient algorithm (commented out above) if needed.
     //let mut sorted = data.to_vec();
     //sorted.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-    //let median = sorted[sorted.len() / 2]; 
-
+    //let median = sorted[sorted.len() / 2];
 
     Ok((min, max, mean, std, median))
 }
@@ -115,4 +98,3 @@ pub fn compute_histogram(data: &[f32], bins: usize) -> Result<Vec<u64>, StatsErr
 
     Ok(hist)
 }
-

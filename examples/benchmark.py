@@ -18,6 +18,21 @@ def numpy_histogram(arr, bins):
     return hist
 
 
+def numpy_entropy(counts):
+    # Convert counts to probabilities
+    total = np.sum(counts)
+    if total == 0:
+        return 0.0
+    probabilities = counts / total
+
+    # Filter out zero probabilities to avoid log(0)
+    probabilities = probabilities[probabilities > 0]
+
+    # Calculate entropy
+    entropy = -np.sum(probabilities * np.log2(probabilities))
+    return float(entropy)
+
+
 def numpy_masked_stats(arr, mask):
     m = arr[mask]
     return {
@@ -72,6 +87,14 @@ def main():
     numpy_hist_res, np_t = benchmark("numpy_hist", numpy_histogram, arr, bins)
 
     print("\nHistogram:")
+    print(f"Rust: {rust_t * 1000:.3f} ms")
+    print(f"NumPy: {np_t * 1000:.3f} ms")
+
+    # --- Entropy ---
+    rust_entropy, rust_t = benchmark("rust_entropy", rasterqc.entropy, rust_hist)
+    numpy_entropy_res, np_t = benchmark("numpy_entropy", numpy_entropy, numpy_hist_res)
+
+    print("\nEntropy:")
     print(f"Rust: {rust_t * 1000:.3f} ms")
     print(f"NumPy: {np_t * 1000:.3f} ms")
 

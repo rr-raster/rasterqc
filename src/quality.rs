@@ -1,7 +1,5 @@
-
 use rayon::prelude::*;
 use thiserror::Error;
-
 
 #[derive(Debug, Error)]
 pub enum StatsError {
@@ -22,12 +20,14 @@ pub fn snr(data: &[f32]) -> Result<f32, StatsError> {
     // Mean
     let mean = data.par_iter().copied().sum::<f32>() / n;
     // Variance
-    let var = data.par_iter()
+    let var = data
+        .par_iter()
         .map(|&x| {
             let d = x - mean;
             d * d
         })
-        .sum::<f32>() / n;
+        .sum::<f32>()
+        / n;
     // Standard deviation
     let std = var.sqrt();
 
@@ -38,19 +38,19 @@ pub fn snr(data: &[f32]) -> Result<f32, StatsError> {
     Ok(mean / std)
 }
 
-
 pub fn dynamic_range(data: &[f32]) -> Result<f32, StatsError> {
     if data.is_empty() {
         return Err(StatsError::EmptyInput);
     }
 
-    let (minv, maxv) = data.par_iter().copied().fold(
-        || (f32::MAX, f32::MIN),
-        |(min, max), v| (min.min(v), max.max(v)),
-    ).reduce(
-        || (f32::MAX, f32::MIN),
-        |a, b| (a.0.min(b.0), a.1.max(b.1)),
-    );
+    let (minv, maxv) = data
+        .par_iter()
+        .copied()
+        .fold(
+            || (f32::MAX, f32::MIN),
+            |(min, max), v| (min.min(v), max.max(v)),
+        )
+        .reduce(|| (f32::MAX, f32::MIN), |a, b| (a.0.min(b.0), a.1.max(b.1)));
 
     if minv <= 0.0 {
         return Err(StatsError::ComputeError);
@@ -65,7 +65,6 @@ pub fn dynamic_range_db(data: &[f32]) -> Result<f32, StatsError> {
     Ok(20.0 * dr.log10())
 }
 
-
 /// Compute uniformity of the data
 /// Uniformity = 1 - (𝜎 / q𝜇)
 /// where 𝜎 is the standard deviation, 𝜇 is the mean, and q is a quality factor (default q=1)
@@ -79,12 +78,14 @@ pub fn uniformity(data: &[f32]) -> Result<f32, StatsError> {
 
     let mean = data.par_iter().copied().sum::<f32>() / n;
 
-    let var = data.par_iter()
+    let var = data
+        .par_iter()
         .map(|&x| {
             let d = x - mean;
             d * d
         })
-        .sum::<f32>() / n;
+        .sum::<f32>()
+        / n;
 
     let std = var.sqrt();
 

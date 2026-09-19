@@ -1,5 +1,5 @@
 // Rust Histogram computation module
-// 
+//
 use rayon::prelude::*;
 use thiserror::Error;
 
@@ -33,12 +33,19 @@ pub fn compute_histogram(data: &[f32], bins: usize) -> Result<Vec<u64>, Histogra
     let (min, max) = data
         .par_iter()
         .cloned()
-        .fold(|| (f32::MAX, f32::MIN), |(mn, mx), v| (mn.min(v), mx.max(v)))
+        .fold(
+            || (f32::MAX, f32::MIN),
+            |(mn, mx), v| (mn.min(v), mx.max(v)),
+        )
         .reduce(|| (f32::MAX, f32::MIN), |a, b| (a.0.min(b.0), a.1.max(b.1)));
 
     let range = max - min;
     // Precompute inverse bin width to replace divisions with a multiply.
-    let inv_bin = if range > 0.0 { (bins as f32) / range } else { 0.0 };
+    let inv_bin = if range > 0.0 {
+        (bins as f32) / range
+    } else {
+        0.0
+    };
 
     let hist = data
         .par_iter()
@@ -73,4 +80,3 @@ pub fn compute_histogram(data: &[f32], bins: usize) -> Result<Vec<u64>, Histogra
 
     Ok(hist)
 }
-

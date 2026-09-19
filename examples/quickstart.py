@@ -4,7 +4,7 @@ import rasterqc
 
 def main():
     # Generate example raster
-    arr = np.random.rand(2048, 2048).astype(np.float32)
+    arr = np.random.rand(512, 512).astype(np.float64)
     arr = arr.ravel()
 
     print("=== Basic Stats ===")
@@ -20,13 +20,13 @@ def main():
     print("\n=== Distribution Stats ===")
     p95 = rasterqc.percentile(arr, 95)
     q50 = rasterqc.quantile(arr, 0.5)
-    iqr = rasterqc.iqr(arr)
+    # iqr = rasterqc.iqr(arr)
     skew = rasterqc.skewness(arr)
     kurt = rasterqc.kurtosis(arr)
 
     print(f"95th percentile: {p95}")
     print(f"median (quantile 0.5): {q50}")
-    print(f"IQR: {iqr}")
+    # print(f"IQR: {iqr}")
     print(f"skewness: {skew}")
     print(f"kurtosis: {kurt}")
 

@@ -70,10 +70,13 @@ pub fn skewness(data: &[f32]) -> Result<f32, DistributionError> {
     // parallel pass to reduce memory passes and iterator overhead.
     let (m2_sum, m3_sum) = data
         .par_iter()
-        .fold(|| (0.0f32, 0.0f32), |(s2, s3), &x| {
-            let d = x - mean;
-            (s2 + d * d, s3 + d * d * d)
-        })
+        .fold(
+            || (0.0f32, 0.0f32),
+            |(s2, s3), &x| {
+                let d = x - mean;
+                (s2 + d * d, s3 + d * d * d)
+            },
+        )
         .reduce(|| (0.0f32, 0.0f32), |a, b| (a.0 + b.0, a.1 + b.1));
 
     let m2: f32 = m2_sum / n;
@@ -98,10 +101,13 @@ pub fn kurtosis(data: &[f32]) -> Result<f32, DistributionError> {
     // Compute both second and fourth central moments in a single parallel pass.
     let (m2_sum, m4_sum) = data
         .par_iter()
-        .fold(|| (0.0f32, 0.0f32), |(s2, s4), &x| {
-            let d = x - mean;
-            (s2 + d * d, s4 + d.powi(4))
-        })
+        .fold(
+            || (0.0f32, 0.0f32),
+            |(s2, s4), &x| {
+                let d = x - mean;
+                (s2 + d * d, s4 + d.powi(4))
+            },
+        )
         .reduce(|| (0.0f32, 0.0f32), |a, b| (a.0 + b.0, a.1 + b.1));
 
     let m2: f32 = m2_sum / n;

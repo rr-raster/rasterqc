@@ -1,1 +1,1 @@
-# rust tests
+// rust tests
