@@ -34,3 +34,6 @@ lint = "cargo clippy"
 
 # Benchmark Rust core
 bench = "cargo bench"
+
+# Dry run for crate publish
+crate-test ="cargo publish --dry-run"
