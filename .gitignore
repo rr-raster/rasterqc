@@ -1,0 +1,12 @@
+.cargo/config.toml
+.env
+.env.sample
+docs/index.html
+docs/index.md
+docs/installation.md
+mkdocs.yaml
+pixi.lock
+scripts/build.ps1
+scripts/build.sh
+src/load.rs
+src/utils.rs
