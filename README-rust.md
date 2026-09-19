@@ -39,4 +39,7 @@ println!("mean = {}", s.mean);
 https://docs.rs/rasterqc
 
 ## License
-MIT
+[![Crates.io](https://img.shields.io/crates/v/rasterqc.svg)](https://crates.io/crates/rasterqc)
+[![Documentation](https://docs.rs/rasterqc/badge.svg)](https://docs.rs/rasterqc)
+![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)
+![Rust](https://img.shields.io/badge/rust-stable-blue.svg)
