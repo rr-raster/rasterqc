@@ -1,5 +1,11 @@
-// Rust Histogram computation module
-//
+/// Histogram computation module
+///
+/// Provides fast, parallel histogram generation for raster and imaging data.
+/// The functions operate on slices of `f32` values and produce a fixed‑width
+/// histogram with `bins` equally spaced intervals.
+///
+/// Errors are returned when the input is empty or the number of bins is zero.
+///
 use rayon::prelude::*;
 use thiserror::Error;
 
