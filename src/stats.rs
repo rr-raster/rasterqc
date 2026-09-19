@@ -1,4 +1,16 @@
-///Core statistics engine
+/// Core statistics module
+///
+/// Provides fast, parallel computation of basic descriptive statistics for
+/// raster and imaging data. The functions operate on slices of `f32` values. 
+/// Functions implemented:
+///
+/// * compute_stats: min, max, mean, std, median
+/// * compute_histogram: histogram counts for a given number of bins
+///
+/// The implementation uses Rayon to parallelize reductions, minimizing
+/// memory passes and improving throughput on large datasets. Median
+/// computation is performed after sorting a local copy of the data.
+///
 use rayon::prelude::*;
 use thiserror::Error;
 
@@ -8,9 +20,18 @@ pub enum StatsError {
     EmptyInput,
 }
 
-/// Compute min, max, mean, std, median on a raster slice.
+/// Compute basic descriptive statistics:
+///  `min`, `max`, `mean`, `std`, and `median`.
 ///
-/// This function is pure Rust and does not depend on Python.
+/// This function performs parallel reduction to compute:
+/// - **min** and **max**  
+/// - **mean** (average value)  
+/// - **standard deviation** (population σ)  
+///
+/// Median is computed after sorting a local copy of the data:
+/// - odd-length slices return the middle element  
+/// - even-length slices return the average of the two middle values  
+///
 pub fn compute_stats(data: &[f32]) -> Result<(f32, f32, f32, f32, f32), StatsError> {
     if data.is_empty() {
         return Err(StatsError::EmptyInput);
@@ -53,7 +74,19 @@ pub fn compute_stats(data: &[f32]) -> Result<(f32, f32, f32, f32, f32), StatsErr
     Ok((min, max, mean, std, median))
 }
 
-/// Optional: histogram computation
+/// Compute a fixed‑width histogram over a slice of `f32` values.
+///
+/// The histogram is divided into `bins` equally spaced intervals between the
+/// minimum and maximum values in the data. The function performs:
+///
+/// * parallel reduction to find `min` and `max`  
+/// * precomputation of the inverse bin width for fast bin indexing  
+/// * per‑thread local histograms merged in a final reduction  
+///
+/// Special cases:
+/// * returns an error if the input is empty  
+/// * if all values are identical, all counts are placed in the last bin  
+///
 pub fn compute_histogram(data: &[f32], bins: usize) -> Result<Vec<u64>, StatsError> {
     if data.is_empty() {
         return Err(StatsError::EmptyInput);
