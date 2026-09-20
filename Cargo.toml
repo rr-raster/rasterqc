@@ -7,8 +7,8 @@ license = "MIT OR Apache-2.0"
 authors = ["Rebecca Ryan <ryan_rebecca@hotmail.com>"]
 repository = "https://github.com/becryan/rasterqc"
 readme = "README-rust.md"
-keywords = ["raster", "statistics", "image", "qc", "geospatial"]
-categories = ["science", "image-processing", "mathematics"]
+keywords = ["raster", "statistics", "image-processing", "qc", "geospatial"]
+categories = ["science", "mathematics","science::geo"]
 
 # Exclude non-Rust packaging files
 exclude = [
