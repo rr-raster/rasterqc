@@ -1,4 +1,3 @@
-# dont know what goes here
 [package]
 name = "rasterqc"
 version = "0.1.0"
@@ -8,38 +7,35 @@ license = "MIT OR Apache-2.0"
 authors = ["Rebecca Ryan <ryan_rebecca@hotmail.com>"]
 repository = "https://github.com/becryan/rasterqc"
 readme = "README-rust.md"
-keywords = ["raster", "statistics", "image", "qc", "pixels","earthobservation"]
+keywords = ["raster", "statistics", "image", "qc", "pixels", "earthobservation"]
 categories = ["science", "image-processing", "mathematics"]
 
+# Exclude non-Rust packaging files
+exclude = [
+    "python/*",
+    "pyproject.toml",
+    "pixi.toml",
+    "pixi.lock",
+    ".pixi/*",
+    "target/*",
+    "*.ipynb",
+]
+
 [lib]
-# Required for Python extension modules and Rust binary linking
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-# PyO3 for Python bindings
 pyo3 = { version = "0.19", features = ["extension-module"] }
-
-# NumPy <-> Rust zero-copy interop
 numpy = "0.19"
-
-# Optional: parallel raster processing -multicore processing
 rayon = "1.10"
-
-# Optional: fast math helpers (SIMD-friendly)
 num-traits = "0.2"
-
-# Ordered wrappers for stable Ord on floats used by selection algorithms
 ordered-float = "3.1"
-
-# Optional: error handling ergonomics
 thiserror = "1.0"
 
-# CLI argument parsing
-#clap = { version = "4.4", features = ["derive"] }
-clap = {version="4.5.4",features = ["derive"]}
+# CLI (downgraded to avoid edition 2024)
+clap = { version = "=4.5.4", features = ["derive"] }
 clap_derive = "=4.5.4"
 
-# JSON serialization
 serde_json = "1.0"
 
 [[bin]]
@@ -47,7 +43,6 @@ name = "rasterqc"
 path = "src/bin/rasterqc.rs"
 
 [profile.release]
-# Optimize for maximum runtime performance
 opt-level = 3
 codegen-units = 1
 lto = true

@@ -37,3 +37,6 @@ bench = "cargo bench"
 
 # Dry run for crate publish
 crate-test ="cargo publish --dry-run"
+
+# Dry run for crate publish
+crate-publish ="cargo publish"
